@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 import { createClient } from "@/utils/supabase/server";
@@ -8,21 +8,16 @@ import { createClient } from "@/utils/supabase/server";
 import Shell from "@/components/store/shell";
 import { ThemeProvider } from "@/components/store/theme-store";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Atlas",
   description: "The NEXT Jamb Practice Software",
 };
+
+const space_grotesk = Space_Grotesk({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"]
+})
 
 export default async function RootLayout({
   children,
@@ -35,7 +30,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${space_grotesk.className} antialiased`}
       >
         <ThemeProvider
           attribute="class"
@@ -44,7 +39,9 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Shell supabase_user={data}>
-            {children}
+            <div className="grid items-center w-full h-screen">
+              {children}
+            </div>
           </Shell>
         </ThemeProvider>
       </body>
