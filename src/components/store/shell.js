@@ -14,19 +14,26 @@
 
 "use client";
 
-import { createContext, useEffect } from "react";
+// Supabase
 import { createClient } from "@/utils/supabase/client";
+
+// React
+import { createContext, useEffect } from "react";
+
+// Next
+import { usePathname } from "next/navigation";
 
 export const ShellContext = createContext();
 
 export default function Shell({ children, supabase_user }) {
   const user = supabase_user;
+  const currentPath = usePathname();
 
   useEffect(() => {
     console.log("Welcome to Atlas", user);
   }, []);
 
   return (
-    <ShellContext.Provider value={{ user }}>{children}</ShellContext.Provider>
+    <ShellContext.Provider value={{ user, currentPath }}>{children}</ShellContext.Provider>
   );
 }
