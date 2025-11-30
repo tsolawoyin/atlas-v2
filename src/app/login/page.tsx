@@ -99,7 +99,7 @@ export default function Login() {
                         {isPending && <Spinner />}
                         Login
                     </Button>
-                    <p className="">New here? <Link href={""} className="text-amber-500">Create a free account</Link></p>
+                    <p className="">New here? <Link href={"/sign-up"} className="text-amber-500">Create a free account</Link></p>
                 </CardFooter>
             </Card>
 
@@ -117,5 +117,3 @@ export default function Login() {
         </form>
     )
 }
-
-
