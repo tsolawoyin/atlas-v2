@@ -27,6 +27,7 @@ import Logo from "@/components/logo"
 
 // Hooks
 import { useState, useContext, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 // Context
 import { ShellContext } from "@/shell/shell";

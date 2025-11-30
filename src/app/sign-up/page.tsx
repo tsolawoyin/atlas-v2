@@ -19,21 +19,39 @@ import { Input } from "@/components/ui/input";
 import Logo from "@/components/logo";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useContext, useTransition } from "react";
 
 import { usePasswordInput } from "@omergulcicek/password-input"
 
-// import { House, Star } from "lucide-react";
+import { ShellContext } from "@/shell/shell";
 
-export default function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+// import { House, Star } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+
+import { AlertCircleIcon } from "lucide-react";
+
+// The only thing remaining is to sanitize input
+// Users can be crazy.
+export default function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  // const [password, setPassword] = useState("");
+
+  const [isPending, startTransition] = useTransition();
+
+  const [error, setError] = useState(null)
+
+  const { auth: { signUp } } = useContext(ShellContext);
 
   const onChangeFn = (value: string, setter: Function) => setter(value);
 
-  const { InputWrapper, wrapperProps, inputProps } = usePasswordInput({
+  const { InputWrapper, wrapperProps, inputProps, value, setValue } = usePasswordInput({
     password: {
       icons: {
         show: <span className="text-xs">Show</span>,
@@ -46,22 +64,47 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
     }
   });
 
+  const signUpHelper = () => {
+    const credentials = {
+      email,
+      password: value,
+      options: {
+        data: {
+          username,
+          fullName
+          // I can add/remove more field as needed later on. Nice one.
+        }
+      }
+    }
+
+    startTransition(async () => {
+      try {
+        // console.log(credentials)
+        await signUp(credentials);
+      } catch (error: any) {
+        setError(error.message);
+      }
+    })
+  }
+
   return (
-    <Card {...props}>
+    <Card>
       <CardHeader className="flex justify-center">
         <Logo />
       </CardHeader>
       <CardContent>
-        <form>
+        <form action={signUpHelper}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="name">Full Name</FieldLabel>
               <Input
                 id="name"
                 type="text"
+                className=""
                 placeholder="John Doe"
                 value={fullName}
                 onChange={(event) => onChangeFn(event.target.value, setFullName)}
+                pattern="[a-zA-Z\s]{3,}"
                 required
               />
             </Field>
@@ -73,6 +116,7 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
                 placeholder="username"
                 value={username}
                 onChange={(event) => onChangeFn(event.target.value, setUsername)}
+                pattern="[a-zA-Z\s\d]{3,}"
                 required
               />
             </Field>
@@ -98,8 +142,8 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
                 <Input
                   id="password"
                   type="password"
-                  value={password}
-                  onChange={(event) => onChangeFn(event.target.value, setPassword)}
+                  value={value}
+                  // onChange={(event) => onChangeFn(event.target.value, setValue)}
                   required
                   {...inputProps}
                 />
@@ -108,13 +152,27 @@ export default function SignupForm({ ...props }: React.ComponentProps<typeof Car
             </Field>
             <FieldGroup>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button className="w-full flex items-center gap-2">
+                  {isPending && <Spinner />}
+                  Create Account
+                </Button>
                 <FieldDescription className="px-6 text-center">
                   Already have an account? <Link href="/login" className="text-amber-500">Log in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
           </FieldGroup>
+          {error && (
+            <div className="grid w-full max-w-xl items-start gap-4">
+              <Alert variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Error!</AlertTitle>
+                <AlertDescription>
+                  <p>{error}</p>
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/server";
 import Shell from "@/shell/shell";
 import { ThemeProvider } from "@/components/theme-store";
 
+import Header from "@/components/header/header";
 
 export const metadata: Metadata = {
   title: "Atlas",
@@ -39,7 +40,8 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Shell supabase_user={data}>
-            <div className="grid items-center w-full h-screen">
+            <div className="w-full h-screen">
+              <Header />
               {children}
             </div>
           </Shell>

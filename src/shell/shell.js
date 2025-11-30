@@ -18,22 +18,27 @@
 import { createContext, useState, useEffect } from "react";
 
 // Next
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 // Supabase
 import { createClient } from "@/utils/supabase/client";
 
 export const ShellContext = createContext();
 
+// The Shell will be the central controller of Atlas
+// The HEART of Atlas.
 // So once the App loads we initialize a supabase client for the entire application.
 // That makes sense instead of wasting supabase object everywhere
+// All routing will be done here unless necessary else
 export default function Shell({ children, supabase_user }) {
   // Initialize supabase client for some useful things
   const supabase = createClient();
   // Set user to user from server
   const [user, setUser] = useState(supabase_user.user);
 
+  // NEXT.js Hooks
   const currentPath = usePathname();
+  const router = useRouter();
 
   // Auth functions
   const auth = {
@@ -41,17 +46,35 @@ export default function Shell({ children, supabase_user }) {
       // credentials is an object
       let { data, error } = await supabase.auth.signInWithPassword(credentials);
 
+      // simple as abc
+      setUser(data.user);
+
       if (error) {
         throw new Error(error);
       }
 
-      return true;
+      router.push("/");
     },
 
     signUp: async function (credentials) {
       let { data, error } = await supabase.auth.signUp(credentials);
+
+      setUser(data.user);
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      router.push("/");
     },
 
+    signOut: async function () {
+      await supabase.auth.signOut();
+      setUser(null);
+      router.push("/login");
+    },
+
+    // So for now this is not that useful
     authStateChange: function () {
       return supabase.auth.onAuthStateChange((event) => {
         // Update context/state when auth changes
@@ -59,9 +82,11 @@ export default function Shell({ children, supabase_user }) {
           console.log("Welcome home User");
         } else if (event === "SIGNED_IN") {
           console.log("User Signed in");
+          console.log(user);
         } else if (event === "SIGNED_OUT") {
           // handle sign out event
-          console.log("User signed out");
+          // console.log("User signed out");
+          setUser(null);
         } else if (event === "PASSWORD_RECOVERY") {
           // handle password recovery event
         } else if (event === "TOKEN_REFRESHED") {
@@ -73,8 +98,7 @@ export default function Shell({ children, supabase_user }) {
     },
   };
 
-  // some things are unnecessary. Like use memo for instance.
-  // next.js have memoize somethings
+  // Database functions
 
   useEffect(() => {
     console.log("Welcome to Atlas", user);
