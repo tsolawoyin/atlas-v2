@@ -5,8 +5,8 @@ import "./globals.css";
 import { createClient } from "@/utils/supabase/server";
 
 // Context
-import Shell from "@/components/store/shell";
-import { ThemeProvider } from "@/components/store/theme-store";
+import Shell from "@/shell/shell";
+import { ThemeProvider } from "@/components/theme-store";
 
 
 export const metadata: Metadata = {
