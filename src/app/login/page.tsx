@@ -96,7 +96,7 @@ export default function Login() {
 
                 </CardContent>
                 <CardFooter className="flex-col gap-6">
-                    <Button className="w-full flex items-center gap-2">
+                    <Button className="w-full flex items-center gap-2" disabled={isPending}>
                         {isPending && <Spinner />}
                         Login
                     </Button>

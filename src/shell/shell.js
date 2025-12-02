@@ -25,6 +25,9 @@ import { createClient } from "@/utils/supabase/client";
 
 export const ShellContext = createContext();
 
+import supabase_db_utility_fn from "./shell-db";
+import utilsFn from "./shell-utils";
+
 // The Shell will be the central controller of Atlas
 // The HEART of Atlas.
 // So once the App loads we initialize a supabase client for the entire application.
@@ -57,15 +60,27 @@ export default function Shell({ children, supabase_user }) {
     },
 
     signUp: async function (credentials) {
-      let { data, error } = await supabase.auth.signUp(credentials);
+      try {
+        let { data, error } = await supabase.auth.signUp(credentials);
 
-      setUser(data.user);
+        if (error) throw error;
 
-      if (error) {
-        throw new Error(error);
+        const postCredentials = {
+          id: data.user.id,
+          username: credentials.options.data.username,
+          full_name: credentials.options.data.fullName,
+        };
+
+        // Wait for profile creation BEFORE navigating
+        await db.profiles.createProfile(postCredentials);
+
+        setUser(data.user);
+
+        // Only navigate after everything is complete
+        router.push("/");
+      } catch (err) {
+        throw new err();
       }
-
-      router.push("/");
     },
 
     signOut: async function () {
@@ -99,6 +114,10 @@ export default function Shell({ children, supabase_user }) {
   };
 
   // Database functions
+  const db = supabase_db_utility_fn(supabase);
+
+  // Utils
+  // const utils = utilsFn();
 
   useEffect(() => {
     console.log("Welcome to Atlas", user);
@@ -113,7 +132,7 @@ export default function Shell({ children, supabase_user }) {
   }, []);
 
   return (
-    <ShellContext.Provider value={{ user, currentPath, supabase, auth }}>
+    <ShellContext.Provider value={{ user, currentPath, supabase, auth, db }}>
       {children}
     </ShellContext.Provider>
   );
