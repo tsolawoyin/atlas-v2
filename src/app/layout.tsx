@@ -12,7 +12,7 @@ import Header from "@/components/header/header";
 
 export const metadata: Metadata = {
   title: "Atlas",
-  description: "The NEXT Jamb Practice Software",
+  description: "JAMB Practice App Built with Next.js", // thank you.
 };
 
 const space_grotesk = Space_Grotesk({
@@ -35,7 +35,7 @@ export default async function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >

@@ -53,7 +53,7 @@ export default function SignupForm() {
     password?: string;
   }>({});
 
-  const { auth: { signUp }, db } = useContext(ShellContext);
+  const { auth: { signUp }, supabase_tables_fn } = useContext(ShellContext);
 
   const { InputWrapper, wrapperProps, inputProps, value, setValue } = usePasswordInput({
     password: {
@@ -125,7 +125,7 @@ export default function SignupForm() {
     setCheckingUsername(true);
     try {
       const sanitized = sanitizeUsername(username);
-      const isAvailable = await db.profiles.isUsernameAvailable(sanitized);
+      const isAvailable = await supabase_tables_fn.profiles.isUsernameAvailable(sanitized);
       setUsernameIsAvailable(isAvailable);
     } catch (error) {
       console.error("Error checking username:", error);

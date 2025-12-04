@@ -23,6 +23,9 @@ import { usePathname, useRouter } from "next/navigation";
 // Supabase
 import { createClient } from "@/utils/supabase/client";
 
+// Dexie
+import { db } from "./shell-local-db";
+
 export const ShellContext = createContext();
 
 import supabase_db_utility_fn from "./shell-db";
@@ -36,8 +39,17 @@ import utilsFn from "./shell-utils";
 export default function Shell({ children, supabase_user }) {
   // Initialize supabase client for some useful things
   const supabase = createClient();
+  // IndexedDB Storage
+  const dexie = db;
+  // Database functions
+  const supabase_tables_fn = supabase_db_utility_fn(supabase);
+  // Utility functions
+  const utils = utilsFn(supabase, dexie); // Cool
   // Set user to user from server
   const [user, setUser] = useState(supabase_user.user);
+
+  // Initialize Subjects And Topics
+  const [subjectsAndTopics, setSubjectsAndTopics] = useState(null);
 
   // NEXT.js Hooks
   const currentPath = usePathname();
@@ -72,7 +84,7 @@ export default function Shell({ children, supabase_user }) {
         };
 
         // Wait for profile creation BEFORE navigating
-        await db.profiles.createProfile(postCredentials);
+        await supabase_tables_fn.profiles.createProfile(postCredentials);
 
         setUser(data.user);
 
@@ -113,12 +125,6 @@ export default function Shell({ children, supabase_user }) {
     },
   };
 
-  // Database functions
-  const db = supabase_db_utility_fn(supabase);
-
-  // Utils
-  // const utils = utilsFn();
-
   useEffect(() => {
     console.log("Welcome to Atlas", user);
   }, []);
@@ -131,8 +137,27 @@ export default function Shell({ children, supabase_user }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // D
+  useEffect(() => {
+    if (user) {
+      utils.fetchSubjectsAndTopics().then((data) => {
+        setSubjectsAndTopics(data);
+      }); //
+    }
+  }, []);
+
   return (
-    <ShellContext.Provider value={{ user, currentPath, supabase, auth, db }}>
+    <ShellContext.Provider
+      value={{
+        user,
+        currentPath,
+        supabase,
+        dexie,
+        supabase_tables_fn,
+        auth,
+        subjectsAndTopics,
+      }}
+    >
       {children}
     </ShellContext.Provider>
   );
